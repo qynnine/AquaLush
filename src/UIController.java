@@ -58,6 +58,7 @@ public class UIController implements KeypadListener,
    private ScrollingScreen manualLocationScrn; // manual device location display
    private ScrollingScreen fixFailuresScrn;    // fix failed devices
    private ScrollingScreen setLevelScrn;       // set zone moisture levels
+   private ScrollingScreen setMaxLevelScrn;       // set zone moisture levels
 
       /* constructors
       /***************/
@@ -97,6 +98,7 @@ public class UIController implements KeypadListener,
       manualLocationScrn = new ScrollingScreen( display );
       fixFailuresScrn    = new ScrollingScreen( display );
       setLevelScrn       = new ScrollingScreen( display );
+      setMaxLevelScrn    = new ScrollingScreen( display );
    }
 
       /* methods
@@ -136,6 +138,7 @@ public class UIController implements KeypadListener,
       buildSetAllocationScrn();
       buildSetTimesScrn();
       buildSetLevelScrn();
+      buildSetMaxLevelScrn();
       buildDeviceFailureScrn();
       buildStoreFailureScrn();
       buildStartFailureScrn();
@@ -769,13 +772,18 @@ public class UIController implements KeypadListener,
       setUpAutoScrn.addPrompt( new Prompt("Set Irrigation Times->", 8,18) );
       setUpAutoScrn.addPrompt( new Prompt(
                                   "Set Critical Moisture Levels->",11,10) );
-      setUpAutoScrn.addPrompt( new Prompt("Finished->",            14,30) );
+      setUpAutoScrn.addPrompt( new Prompt(
+    		  					   "Set Maximal Moisture Levels->",14,11) );
+      setUpAutoScrn.addPrompt( new Prompt("<-Finished",            5,0) );
 
+      
          // enter state machine transitions to other screens
       setUpAutoScrn.setTransition( 1, setAllocationScrn );
       setUpAutoScrn.setTransition( 3, setTimesScrn );
       setUpAutoScrn.setTransition( 5, setLevelScrn );
-      setUpAutoScrn.setTransition( 7, LAST_MAIN_SCRN );
+      setUpAutoScrn.setTransition( 7, setMaxLevelScrn );
+      
+      setUpAutoScrn.setTransition( 0, LAST_MAIN_SCRN );
       setUpAutoScrn.setEscapeTarget( LAST_MAIN_SCRN );
 
    } // buildSetUpAutoScrn
@@ -935,13 +943,13 @@ public class UIController implements KeypadListener,
 
          // state the prompts
       setLevelScrn.addPrompt( new Prompt(
-                            "Zone Level Location",                0, 3) );
+                            "Zone C-Level Location",                0, 3) );
       setLevelScrn.addPrompt( new Prompt(
                             "----------------------------------", 1, 3) );
       setLevelScrn.addPrompt( new Prompt(
                             "----------------------------------", 5, 3) );
       setLevelScrn.addPrompt( new Prompt(
-                            "Keys change zone's moisture level.", 6, 3) );
+                            "Keys change zone's critical moisture level.", 6, 3) );
       setLevelScrn.addPrompt( new Prompt("<-Propagate Setting",   8, 0) );
       setLevelScrn.addPrompt( new Prompt("  to All Zones",        9, 0) );
       setLevelScrn.addPrompt( new Prompt("Scroll Up->",           8,29) );
@@ -994,6 +1002,79 @@ public class UIController implements KeypadListener,
       setLevelScrn.setButtonPressAction( 7, doAccept );
 
    } // buildSetLevelScrn
+   
+  
+   /**
+    *  Add prompts, transitions, and commands to the screen where
+    *  each zone's critical moisture level is displayed and set.
+    */
+
+private void buildSetMaxLevelScrn() {
+
+      // state the prompts
+   setMaxLevelScrn.addPrompt( new Prompt(
+                         "Zone Max-Level Location",                0, 3) );
+   setMaxLevelScrn.addPrompt( new Prompt(
+                         "----------------------------------", 1, 3) );
+   setMaxLevelScrn.addPrompt( new Prompt(
+                         "----------------------------------", 5, 3) );
+   setMaxLevelScrn.addPrompt( new Prompt(
+                         "Keys change zone's max moisture level.", 6, 3) );
+   setMaxLevelScrn.addPrompt( new Prompt("<-Propagate Setting",   8, 0) );
+   setMaxLevelScrn.addPrompt( new Prompt("  to All Zones",        9, 0) );
+   setMaxLevelScrn.addPrompt( new Prompt("Scroll Up->",           8,29) );
+   setMaxLevelScrn.addPrompt( new Prompt("Scroll Down->",        11,27) );
+   setMaxLevelScrn.addPrompt( new Prompt("Accept New Settings->",14,19) );
+
+      // enter state machine transitions to other screens
+   setMaxLevelScrn.setTransition( 7, setUpAutoScrn );
+   setMaxLevelScrn.setEscapeTarget( setUpAutoScrn );
+
+      // create a screen state object
+   setMaxLevelScrn.setScreenState( new SetMaxLevelScrnState(irrigator) );
+
+      // arrange to accept key presses
+   EventAction doKeyPress
+      = new EventAction() {
+           public void execute( Screen scrn, Object arg ) {
+              SetMaxLevelScrnState state
+                 = (SetMaxLevelScrnState)scrn.getScreenState();
+              state.keyPress( (KeyPress)arg );
+              ((ScrollingScreen)scrn).displayScrolledItems();
+           }
+        }; // doKeyPress
+
+  setMaxLevelScrn.setKeyPressAction( doKeyPress );
+
+      // propagate the current zone's level to all
+   EventAction doPropagate 
+      = new EventAction() {
+           public void execute( Screen scrn, Object arg ) {
+        	   SetMaxLevelScrnState state
+                 = (SetMaxLevelScrnState)scrn.getScreenState();
+              state.propagateSetting( (Integer)arg );
+              ((ScrollingScreen)scrn).displayScrolledItems();
+           }
+        }; // doPropogate
+
+  setMaxLevelScrn.setButtonPressAction( 2, doPropagate );
+
+      // accept the new settings
+   EventAction doAccept 
+      = new EventAction() {
+           public void execute( Screen scrn, Object arg ) {
+        	   SetMaxLevelScrnState state
+                 = (SetMaxLevelScrnState)scrn.getScreenState();
+              state.acceptSettings( (Integer)arg );
+           }
+        }; // doAccept
+
+  setMaxLevelScrn.setButtonPressAction( 7, doAccept );
+
+} // buildSetMaxLevelScrn
+
+   
+   
 
       /**
        *  Add prompts, transitions, and commands to the screen that 

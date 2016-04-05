@@ -21,7 +21,7 @@ import irrigation.ZoneReport;
 
 import java.util.Collection;
 
-class SetLevelScrnState extends ScreenState implements ScrollingScreenState {
+class SetMaxLevelScrnState extends ScreenState implements ScrollingScreenState {
 
       /* attributes
       /*************/
@@ -37,7 +37,7 @@ class SetLevelScrnState extends ScreenState implements ScrollingScreenState {
       /* constructors
       /***************/
 
-   SetLevelScrnState( Irrigator theIrrigator ) {
+   SetMaxLevelScrnState( Irrigator theIrrigator ) {
 
       irrigator = theIrrigator;
       isChanged = false;
@@ -156,7 +156,6 @@ class SetLevelScrnState extends ScreenState implements ScrollingScreenState {
        *          for all zones for which a valid specification is present.
        *   @param whichBtn  The screen button pressed by the user--ignored
        */
-
    void acceptSettings( Integer whichBtn ) {
 
          // do nothing if no specification is changed
@@ -167,7 +166,7 @@ class SetLevelScrnState extends ScreenState implements ScrollingScreenState {
          if ( 0 < items[i].value2.length() ) {
             try {
                int level = Integer.parseInt( items[i].value2 );
-               irrigator.setCriticalMoistureLevel( items[i].value1, level );
+               irrigator.setMaximalMoistureLevel( items[i].value1, level );
             }
             catch ( NumberFormatException e ) {
                throw new Error( "Moisture level parsing exception." );
@@ -175,7 +174,7 @@ class SetLevelScrnState extends ScreenState implements ScrollingScreenState {
          }
       }
 
-         // reset attributes so everything will be ready next time
+       // reset attributes so everything will be ready next time
       createItems();
       isChanged = false;
 
@@ -228,15 +227,15 @@ class SetLevelScrnState extends ScreenState implements ScrollingScreenState {
       int cnt = 0;
       for ( ZoneReport report : zoneReports ) {
          String zoneID           = report.id;
-         String levelString      = String.valueOf( report.criticalLevel );
+         String maxLevelString      = String.valueOf( report.maxLevel );
          StringBuffer textBuffer = new StringBuffer( BLANK_LINE );
 
             // put in the zone id
          textBuffer.replace( 3, 3+zoneID.length(), zoneID );
 
             // put in the level
-         int start = 12-levelString.length();
-         textBuffer.replace( start, 12, levelString );
+         int start = 12-maxLevelString.length();
+         textBuffer.replace( start, 12, maxLevelString );
 
             // append the location
          textBuffer.setLength( 18 );
@@ -244,7 +243,7 @@ class SetLevelScrnState extends ScreenState implements ScrollingScreenState {
 
             // create an item with the text, zoneID, and levelString
          items[cnt++] = new Item( textBuffer.toString(),
-                                  zoneID, levelString );
+                                  zoneID, maxLevelString );
       }
 
          // insertion sort the arrays by the item.value1 field (zoneID)

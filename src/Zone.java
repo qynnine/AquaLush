@@ -26,6 +26,7 @@ class Zone {
    private final String     location; // description from configuration
    private final Set<Valve> valves;   // all the valves in this zone
 
+   private int    maxLevel;     	 // when this zone needs to stop the irrigation
    private int    criticalLevel;      // when this zone needs irrigation
    private int    allocation;         // gallons per irrigation cycle
    private int    waterUsed;          // gallons used so far in a cycle
@@ -45,6 +46,7 @@ class Zone {
       location      = theLocation;
       valves        = new HashSet<Valve>();
       criticalLevel = 0;
+      maxLevel      = 50;
       allocation    = 0;
       waterUsed     = 0;
       sensor        = null;
@@ -84,7 +86,7 @@ class Zone {
        */
 
    ZoneReport getZoneReport() {
-      return new ZoneReport( id, location, criticalLevel );
+      return new ZoneReport( id, location, criticalLevel, maxLevel );
    }
 
       /**
@@ -260,7 +262,7 @@ class Zone {
        *
        *     @pre 0 <= theLevel <= 100
        *    @post the critical moisture level is set or an exception is thrown
-       *   @param theLevel  The new moisture level
+       *   @param theLevel  The new critical moisture level
        *  @throws IllegalArgumentException if @pre is violated
        */
 
@@ -273,6 +275,25 @@ class Zone {
       criticalLevel = theLevel;
 
    } // setCriticalMoistureLevel
+   
+   /**
+    *  Set the zone's maximal moisture level
+    *
+    *     @pre 0 <= theLevel <= 100
+    *    @post the maximal moisture level is set or an exception is thrown
+    *   @param theLevel  The new maximal moisture level
+    *  @throws IllegalArgumentException if @pre is violated
+    */
+
+void setMaximalMoistureLevel( int theLevel ) {
+
+   if ( (theLevel < 0) || (100 < theLevel) )
+      throw new IllegalArgumentException(
+          "Maximal moisture level out of range." );
+
+   maxLevel = theLevel;
+
+} // setMaximalMoistureLevel
       
       /**
        *  Set the zone's irrigation water allocation.

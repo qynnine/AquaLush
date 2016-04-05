@@ -38,6 +38,7 @@ public class Irrigator implements Observer {
    private final static String DEFAULT_IRRIGATION_TIME = "200";
    private final static String DEFAULT_IRRIGATION_DAYS = "MTuWThFSaSu";
    private final static String DEFAULT_CRITICAL_LEVEL  = "50";
+   private final static String DEFAULT_MAX_LEVEL       = "50";
    private final static String DEFAULT_IS_DEVICE_OK    = "true";
 
       // tags used in the persistent store property list
@@ -46,6 +47,7 @@ public class Irrigator implements Observer {
    private final static String IRRIGATION_TIME_TAG = "irrigationTime";
    private final static String IRRIGATION_DAYS_TAG = "irrigationDays";
    private final static String CRITICAL_LEVEL_TAG  = ".criticalMoistureLevel";
+   private final static String MAXIMAL_LEVEL_TAG   = ".maximalMoistureLevel";
    private final static String DEVICE_OK_TAG       = ".isWorking";
 
 
@@ -215,6 +217,7 @@ public class Irrigator implements Observer {
          throw new StartupException();
       }
       zone.setCriticalMoistureLevel( level );
+      //TODO: zone.setMaximalMoistureLevel( level );
    }
 
       /**
@@ -612,6 +615,25 @@ public class Irrigator implements Observer {
       storeData( zoneID + CRITICAL_LEVEL_TAG, String.valueOf(theLevel) );
 
    } // setCriticalMoistureLevel
+   
+   
+	   /**
+	    *  Set the maximal moisture level for a zone.
+	    *
+	    *     @pre zoneID is valid and 0 <= theLevel <= 100
+	    *    @post the maximal moisture level is changed or an exception is thrown
+	    *   @param   zoneID  A zone identifier
+	    *   @param theLevel  The new moisture level for the zone
+	    *  @throws IllegalArgumentException if @pre is violated
+	    */
+	
+	public synchronized void setMaximalMoistureLevel( String zoneID,
+	                                                   int theLevel ) {
+	
+	   findZone(zoneID).setMaximalMoistureLevel( theLevel );
+	   storeData( zoneID + MAXIMAL_LEVEL_TAG, String.valueOf(theLevel) );
+	
+	} // setMaximalMoistureLevel
 
       /**
        *  Create and start up a new manual irrigation cycle, provided a
